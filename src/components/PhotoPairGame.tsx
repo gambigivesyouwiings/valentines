@@ -6,24 +6,24 @@ import { useState, useEffect } from "react";
 
 // 18 images
 const images = [
-  "/game-photos/1.avif",
-  "/game-photos/2.avif",
-  "/game-photos/3.avif",
-  "/game-photos/4.avif",
-  "/game-photos/5.avif",
-  "/game-photos/6.avif",
-  "/game-photos/7.avif",
-  "/game-photos/8.avif",
-  "/game-photos/9.avif",
-  "/game-photos/10.avif",
-  "/game-photos/11.avif",
-  "/game-photos/12.avif",
-  "/game-photos/13.avif",
-  "/game-photos/14.avif",
-  "/game-photos/15.avif",
-  "/game-photos/16.avif",
-  "/game-photos/17.avif",
-  "/game-photos/18.avif",
+  "/game-photos/1.jpg",
+  "/game-photos/2.jpg",
+  "/game-photos/3.jpg",
+  "/game-photos/4.jpg",
+  "/game-photos/5.jpg",
+  "/game-photos/6.jpg",
+  "/game-photos/7.jpg",
+  "/game-photos/8.HEIC",
+  "/game-photos/9.HEIC",
+  "/game-photos/10.HEIC",
+  "/game-photos/11.png",
+  "/game-photos/12.png",
+  "/game-photos/13.HEIC",
+  "/game-photos/14.HEIC",
+  "/game-photos/15.jpg",
+  "/game-photos/16.HEIC",
+  "/game-photos/17.jpg",
+  "/game-photos/18.HEIC",
 ];
 
 // Create 18 pairs of images (36 images in total)
@@ -57,7 +57,14 @@ export default function PhotoPairGame({
   const [selected, setSelected] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [incorrect, setIncorrect] = useState<number[]>([]);
-  const [images] = useState(() => shuffleArray([...imagePairs]));
+  const [shuffledImages, setShuffledImages] = useState<string[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  // Shuffle images only on the client to avoid hydration mismatch
+  useEffect(() => {
+    setShuffledImages(shuffleArray([...imagePairs]));
+    setIsClient(true);
+  }, []);
 
   const handleClick = async (index: number) => {
     if (selected.length === 2 || matched.includes(index) || selected.includes(index)) return;
@@ -66,7 +73,7 @@ export default function PhotoPairGame({
       const firstIndex = selected[0];
       setSelected((prev) => [...prev, index]);
 
-      if (images[firstIndex] === images[index]) {
+      if (shuffledImages[firstIndex] === shuffledImages[index]) {
         setMatched((prev) => [...prev, firstIndex, index]);
         setSelected([]);
       } else {
@@ -88,11 +95,26 @@ export default function PhotoPairGame({
     }
   }, [matched, handleShowProposal]);
 
+  // Don't render until client-side shuffle is complete
+  if (!isClient) {
+    return (
+      <div className="grid grid-cols-9 gap-1 lg:gap-2 max-w-[95vw] mx-auto place-items-center">
+        {heartLayout.flat().map((index, i) =>
+          index !== null ? (
+            <div key={i} className="w-[11vh] h-[11vh] lg:w-20 lg:h-20 bg-gray-300 rounded-sm lg:rounded-md" />
+          ) : (
+            <div key={i} className="w-[11vh] h-[11vh] lg:w-20 lg:h-20" />
+          )
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-9 gap-1 lg:gap-2 max-w-[95vw] mx-auto place-items-center">
       {/* Image preload */}
       <div className="hidden">
-        {images.map((image, i) => (
+        {shuffledImages.map((image, i) => (
           <Image
             key={i}
             src={image}
@@ -139,7 +161,7 @@ export default function PhotoPairGame({
                 style={{ backfaceVisibility: "hidden" }}
               >
                 <Image
-                  src={images[index]}
+                  src={shuffledImages[index]}
                   alt={`Imagen ${index + 1}`}
                   fill
                   className="rounded-sm lg:rounded-md object-cover"
