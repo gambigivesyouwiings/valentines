@@ -1,12 +1,15 @@
 import { Playfair_Display } from "next/font/google";
-import Link from "next/link";
 
 const playfairDisplay = Playfair_Display({
   display: "swap",
   subsets: ["latin"],
 });
 
-export default function TextFooter() {
+type TextFooterProps = {
+  onSkip?: () => void;
+};
+
+export default function TextFooter({ onSkip }: TextFooterProps) {
   return (
     <>
       {/* Left Text */}
@@ -23,8 +26,11 @@ export default function TextFooter() {
         to reveal <br /> <span className="text-gray-400">the surprise</span>
       </h1>
 
-      {/* Copyright */}
-      <p className="absolute bottom-5 right-5 text-white text-sm opacity-15 hover:opacity-50">
+      {/* Copyright - click to skip for testing */}
+      <p
+        className="absolute bottom-5 right-5 text-white text-sm opacity-15 hover:opacity-50 cursor-pointer select-none"
+        onClick={onSkip}
+      >
         © {new Date().getFullYear()}{" "}
         Made with ❤️ by{" Victor"}
       </p>

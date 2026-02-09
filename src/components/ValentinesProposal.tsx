@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Playfair_Display } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
 import Fireworks from "@fireworks-js/react";
@@ -38,6 +38,8 @@ export default function ValentinesProposal() {
     left: string;
   } | null>(null);
   const [showFireworks, setShowFireworks] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const getRandomPosition = () => {
     const randomTop = Math.random() * 80;
@@ -59,10 +61,31 @@ export default function ValentinesProposal() {
   const handleYesClick = () => {
     setShowFireworks(true);
     setStep(3);
+    // Play background music
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {
+        // Autoplay may be blocked by browser
+      });
+    }
+  };
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
+      <audio ref={audioRef} loop>
+        <source src="/music.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
       <AnimatePresence mode="wait">
         {step === 0 && (
           <motion.h2
@@ -158,7 +181,7 @@ export default function ValentinesProposal() {
             exit={{ opacity: 0 }}
           >
             Thank you for accepting baby, I love you! 💕
-            <p className="text-sm mt-4">I'll pick you up in the afternoon, can't wait to see you all dressed up!!! 💌</p>
+            <p className="text-sm mt-4">Reach out to me for more details, can't wait to see you all dressed up!!! 💌</p>
             <br></br>
             <Image
               src="/lambert.gif"
@@ -186,6 +209,17 @@ export default function ValentinesProposal() {
             }}
           />
         </div>
+      )}
+
+      {/* Music toggle button */}
+      {step === 3 && (
+        <button
+          onClick={toggleMusic}
+          className="absolute top-5 right-5 text-white text-2xl opacity-60 hover:opacity-100 transition-opacity z-50"
+          aria-label={isPlaying ? "Pause music" : "Play music"}
+        >
+          {isPlaying ? "🎵" : "🔇"}
+        </button>
       )}
     </div>
   );

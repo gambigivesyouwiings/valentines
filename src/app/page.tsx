@@ -32,7 +32,7 @@ export default function Home() {
           >
             <PhotoPairGame handleShowProposal={handleShowProposal} />
             <div className="mt-4 md:mt-0">
-              <TextFooter />
+              <TextFooter onSkip={handleShowProposal} />
             </div>
           </motion.div>
         ) : (
